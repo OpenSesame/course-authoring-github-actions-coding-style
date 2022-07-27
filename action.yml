@@ -19,7 +19,7 @@ runs:
           ${{ runner.os }}-node-
     - name: Verify Coding Style
       shell: bash
-      run: npm run lint:ci --if-present
+      run: npm run lint:ci
     - name: Upload Linting Results
       uses: actions/upload-artifact@v3.1.0
       with:
