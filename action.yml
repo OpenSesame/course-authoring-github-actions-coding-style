@@ -1,14 +1,27 @@
-name: 'Hello World'
-description: 'Greet someone'
-inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
-    required: true
-    default: 'World'
+name: 'Verify coding style'
+description: 'Verify coding style for a Node-based package'
 runs:
   using: "composite"
   steps:
-    - run: echo Hello ${{ inputs.who-to-greet }}.
+    - uses: actions/cache@v3
+      id: restore-commit
+      with:
+        path: ./*
+        key: ${{ github.sha }}
+    - name: Checkout
+      if: steps.restore-commit.outputs.cache-hit != 'true'
+      uses: actions/checkout@v3.0.2
+    - uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Verify Coding Style
       shell: bash
-    - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
-      shell: bash          
+      run: npm run lint:ci --if-present
+    - name: Upload Linting Results
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: Linting Results
+        path: lintOutput.txt
